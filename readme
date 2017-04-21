@@ -1,0 +1,15 @@
+try:
+	Work directory: /tmp/Compress
+except:
+	Work directory: ~/Compress
+Rafael:
+	debes insertar el *.po en la carpeta po  y luego:
+'python setup.py build'
+de esta forma se instalan las traucciones y luego inicias el programa y wala ahi 
+esta!
+ah!
+Tambien cambiar
+"Content-Type: text/plain; charset=CHARSET\n"
+por
+"Content-Type: text/plain; charset=UTF-8\n"
+
