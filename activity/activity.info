@@ -1,8 +1,11 @@
 [Activity]
 name= Compress
+license = GPLv3+;GPLv2+
 activity_version = 14
 show_launcher = 1
 bundle_id = org.CeibalJAM.Compress
 exec = sugar-activity Compress.Compress -s
 icon = Compress
-license = GPLv3+
+repository = https://github.com/sugarlabs/compress-activity
+summary = 
+tags = 
