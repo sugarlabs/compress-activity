@@ -7,5 +7,3 @@ bundle_id = org.CeibalJAM.Compress
 exec = sugar-activity Compress.Compress -s
 icon = Compress
 repository = https://github.com/sugarlabs/compress-activity
-summary = 
-tags = 
