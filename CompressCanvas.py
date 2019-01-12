@@ -19,40 +19,43 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 try:
 	from Compress import *
-	import utils
-	import gtk,os,shutil,gobject,pygtk
-	from sugar.graphics.objectchooser import ObjectChooser
-	from sugar.datastore import datastore
+	import utils3 as utils
+	import shutil,os,pygtk
+	from gi.repository import Gtk,Gdk,GdkPixbuf
+	from sugar3.graphics.objectchooser import ObjectChooser
+	from sugar3.datastore import datastore
 	shutil.rmtree('/tmp/Compress')
 	os.mkdir('/tmp/Compress')
 	os.mkdir('/tmp/Compress/Work')
 except:
 	pass
 from gettext import gettext as _
+from gi.repository import GObject, Gdk
+from sugar3.datastore import datastore
 Archivo = None
 # CONSTANTES #
 Directorio = _("Nuevo directorio")
-Hboxx = gtk.HBox()
-Uri = gtk.Entry()
+Hboxx = Gtk.HBox()
+Uri = Gtk.Entry()
 Uri.set_text(os.getcwd())
 Uri.props.secondary_icon_stock = 'gtk-apply'
 Uri.props.secondary_icon_activatable = True
 Estado = False
-entrada = gtk.Entry()
+entrada = Gtk.Entry()
 entrada.props.secondary_icon_stock = 'gtk-apply'
 entrada.props.secondary_icon_activatable = True
-botons = gtk.Button(gtk.STOCK_OK)
+botons = Gtk.Button(Gtk.STOCK_OK)
 save = utils.Boton(_('Guardar archivo'),'document-save')
 entrada.set_text(_("Para que los cambios se guarden presione la tecla '↵' o el icono √ "))
 ###
 
-class Canvas(gtk.TreeView):
+class Canvas(Gtk.TreeView):
 	def __init__(self):
 		
 		self.modelo = None
 		self.treeview_arbol = None
 		self.barra_de_estado = None
-		gtk.TreeView.__init__(self)
+		GObject.GObject.__init__(self)
 		try:
 			Home.connect('clicked',self.home)
 			Abrir.connect('clicked',self.open,True)		
@@ -73,8 +76,8 @@ class Canvas(gtk.TreeView):
 		self.modelo = self.construir_lista()
 		self.construir_columnas()
 		self.seleccion = self.get_selection() # treeview.get_selection()
-		self.seleccion.set_mode(gtk.SELECTION_SINGLE)
-		self.seleccion.set_select_function(self.archivo_clickeado, self.modelo, True)
+		self.seleccion.set_mode(Gtk.SelectionMode.SINGLE)
+		self.seleccion.set_select_function(self.archivo_clickeado, self.modelo)
 		self.connect("row-activated", self.doble_click)
 		self.connect('button-release-event', self.menu_click)  
 		self.connect('key-release-event', self.atras_button)   
@@ -106,7 +109,7 @@ class Canvas(gtk.TreeView):
 		Uri.set_text(os.getcwd())
 		Uri.show()
 		self.set_model(self.construir_lista())	
-	def archivo_clickeado(self, seleccion, modelo, archivo, seleccionado, a): # Cuando se selecciona
+	def archivo_clickeado(self, seleccion, modelo, archivo, seleccionado, a=None): # Cuando se selecciona
 		iter= modelo.get_iter(archivo)
 		directorio =  modelo.get_value(iter,0)
 		utils.Archivos = directorio
@@ -132,11 +135,11 @@ class Canvas(gtk.TreeView):
 			save.hide()
 		return True
 	def anadir(self,widget):
-		Selector = gtk.FileChooserDialog(_("Seleccione un archivo"),None,gtk.FILE_CHOOSER_ACTION_OPEN,(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,gtk.STOCK_OK, gtk.RESPONSE_OK))
-		Selector.set_default_response(gtk.RESPONSE_CANCEL)
+		Selector = Gtk.FileChooserDialog(_("Seleccione un archivo"),None,Gtk.FileChooserAction.OPEN,(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,Gtk.STOCK_OK, Gtk.ResponseType.OK))
+		Selector.set_default_response(Gtk.ResponseType.CANCEL)
 		if utils.Archivo_d != None:
 			Echo = Selector.run()
-			if Echo == gtk.RESPONSE_OK:
+			if Echo == Gtk.ResponseType.OK:
 				File = Selector.get_filename()
 				print 'ARCHIVO'
 				print File
@@ -145,7 +148,7 @@ class Canvas(gtk.TreeView):
 				utils.decompress(utils.Archivo_d,Hboxx)
 				print 'DESCOMPRIMIDO'
 				Selector.destroy()
-			elif Echo == gtk.RESPONSE_CANCEL:
+			elif Echo == Gtk.ResponseType.CANCEL:
 				Selector.destroy()
 		if utils.Archivo_d == None:
 				self.errores('Copiar_a_nada')
@@ -156,7 +159,7 @@ class Canvas(gtk.TreeView):
 	def open_diario(self,widget): # Abrir un zip desde el diario.
 			chooser = ObjectChooser()      
 			resultado = chooser.run()
-   			if resultado == gtk.RESPONSE_ACCEPT:
+   			if resultado == Gtk.ResponseType.ACCEPT:
 				Archivo_s = chooser.get_selected_object()
 				Archivo = Archivo_s.get_file_path()
 				try:
@@ -166,14 +169,14 @@ class Canvas(gtk.TreeView):
 		
 				except IOError:
 					Mensaje = _("""Oh..Parece que no selecciono un archivo zip""")
-					info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=Mensaje)
+					info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=Mensaje)
 					a = info.run()
-					if a == gtk.RESPONSE_OK:
+					if a == Gtk.ResponseType.OK:
 						info.destroy()
 						self.set_model(self.construir_lista())
 						Uri.set_text(os.getcwd())
 	def construir_lista(self):
-		store = gtk.ListStore(str)
+		store = Gtk.ListStore(str)
 		dirList=os.listdir(os.getcwd())
 		dircontents = []
 		for item in dirList: 
@@ -189,18 +192,17 @@ class Canvas(gtk.TreeView):
 		return store
 	def descomprimir_en(self,widget=None):
 		if not self.presentado:
-			label = gtk.Label(_('Carpeta:'))
+			label = Gtk.Label(label=_('Carpeta:'))
 
 			#entrada.set_text('/tmp/Compress/Work')
-			boton = gtk.Button(gtk.STOCK_OPEN)
-			botona = gtk.Button(gtk.STOCK_CANCEL)
+			boton = Gtk.Button(Gtk.STOCK_OPEN)
+			botona = Gtk.Button(Gtk.STOCK_CANCEL)
 			botona.set_use_stock(True)
 			botona.connect('clicked',lambda x:Hboxx.hide())
 			boton.set_use_stock(True)
 			boton.connect('clicked',utils.Abrir_Directorio,entrada,utils.Archivos,Estado,Hboxx)
 			Hboxx.pack_start(label,False,False,0)
 			Hboxx.pack_start(entrada,True,True,0)
-			Hboxx.modify_bg(gtk.STATE_NORMAL,gtk.gdk.color_parse('#FF0000'))
 			Hboxx.pack_start(boton,False,False,0)
 			botons.set_use_stock(True)
 			Hboxx.pack_start(botons,False,False,0)
@@ -221,8 +223,8 @@ class Canvas(gtk.TreeView):
 		self.descomprimir_en()
 		Estado = True
 	def construir_columnas(self):
-		columna= gtk.TreeViewColumn(_('Archivos en el directorio'))
-		celda_de_texto = gtk.CellRendererText() # para el texto
+		columna= Gtk.TreeViewColumn(_('Archivos en el directorio'))
+		celda_de_texto = Gtk.CellRendererText() # para el texto
 		columna.pack_start(celda_de_texto, True)
 		self.append_column (columna)
 		columna.set_attributes(celda_de_texto, text=0)
@@ -232,13 +234,13 @@ class Canvas(gtk.TreeView):
 		Archivo = utils.describe_archivo(os.getcwd()+"/"+utils.Archivos)
 		if target[0] != "/":
 				utils.Archivos = target
-				ventana = gtk.Window()
+				ventana = Gtk.Window()
 				ventana.set_title(target)																									
 				ventana.connect('destroy',lambda x: ventana.destroy)
 				if 'image' in Archivo:
 					try:
-						pix = gtk.gdk.pixbuf_new_from_file(target)
-						image = gtk.Image()
+						pix = GdkPixbuf.Pixbuf.new_from_file(target)
+						image = Gtk.Image()
 						image.set_from_pixbuf(pix)
 						ventana.add(image)
 						image.show()
@@ -247,10 +249,11 @@ class Canvas(gtk.TreeView):
 						self.ops(_('imagen'))
 				if not 'binary' in Archivo:
 					try:
-						ventana.set_size_request(gtk.gdk.screen_width()/2,gtk.gdk.screen_height()/2)
-						texta = gtk.ScrolledWindow()
-						texs = gtk.TextBuffer()
-						text = gtk.TextView(texs)
+						ventana.set_size_request(Gdk.Screen.width()/2,Gdk.Screen.height()/2)
+						texta = Gtk.ScrolledWindow()
+						texs = Gtk.TextBuffer()
+						text = Gtk.TextView()
+						text.set_buffer(texs)
 						texta.add(text)
 						text.set_editable(False)
 						texs.set_text(open(target).read())
@@ -267,9 +270,9 @@ class Canvas(gtk.TreeView):
 			Uri.set_text(os.getcwd())
 			Uri.show()
 	def create_columns(self, treeView):
-		rendererText = gtk.CellRendererText()
-		img = celda_de_imagen = gtk.CellRendererPixbuf()
-		column = gtk.TreeViewColumn(_('Archivos en el directorio'))
+		rendererText = Gtk.CellRendererText()
+		img = celda_de_imagen = Gtk.CellRendererPixbuf()
+		column = Gtk.TreeViewColumn(_('Archivos en el directorio'))
 		column.set_sort_column_id(0)
 		column.pack_start(rendererText,False)    
 		column.set_attributes(rendererText, text=0)
@@ -282,56 +285,56 @@ class Canvas(gtk.TreeView):
 	def menu_click(self,widget,event):
 		Boton = event.button
 		Tiempo = event.time
-		Menu = gtk.Menu()
+		Menu = Gtk.Menu()
 		Archivo = utils.describe_archivo(os.getcwd()+"/"+utils.Archivos)
 		if Boton == 3:
 			if utils.Archivo_d == None:
 				if 'zip' in Archivo:
-					Abrir = gtk.MenuItem(_('Abrir zip'))
+					Abrir = Gtk.MenuItem(_('Abrir zip'))
 					Abrir.connect('activate',self.open)
 					Menu.append(Abrir)
 				else:
 					pass
 			else:
-				Close = gtk.MenuItem(_('Cerrar zip:  %s'%utils.Archivo_d))
+				Close = Gtk.MenuItem(_('Cerrar zip:  %s'%utils.Archivo_d))
 				Close.connect('activate',self.close)
 				Menu.append(Close)
-			Menu.append(gtk.SeparatorMenuItem())
-			Copy = gtk.MenuItem(_('Copiar'))
+			Menu.append(Gtk.SeparatorMenuItem())
+			Copy = Gtk.MenuItem(_('Copiar'))
 			Copy.connect('activate',self.copy)
 			if 'zip' in Archivo:
-				Des = gtk.MenuItem(_('Descomprimir'))
+				Des = Gtk.MenuItem(_('Descomprimir'))
 				Des.connect('activate',self.descomprimir)
-			Cut = gtk.MenuItem(_('Cortar'))
+			Cut = Gtk.MenuItem(_('Cortar'))
 			Cut.connect('activate',self.cut)
-			Delete = gtk.MenuItem(_('Borrar'))
+			Delete = Gtk.MenuItem(_('Borrar'))
 			Delete.connect('activate',self.sure)
-			CompressFile= gtk.MenuItem(_('Comprimir este archivo'))
+			CompressFile= Gtk.MenuItem(_('Comprimir este archivo'))
 			CompressFile.connect('activate',self.compress_file,utils.Archivos)
 			Menu.append(CompressFile)
 			try:
 				Menu.append(Des)
 			except:
 				pass
-			Menu.append(gtk.SeparatorMenuItem())
+			Menu.append(Gtk.SeparatorMenuItem())
 			if utils.Archivo_d != None:
-				Copyw = gtk.MenuItem(_('Copiar al zip'))
+				Copyw = Gtk.MenuItem(_('Copiar al zip'))
 				Copyw.connect('activate',self.copy,True)
 				Menu.append(Copyw)
 			Menu.append(Copy)
 			
 			Menu.append(Cut)
-			Back = gtk.MenuItem(_('Atras'))
+			Back = Gtk.MenuItem(_('Atras'))
 			Back.connect('activate',self.back)
 			if os.listdir('/tmp/Compress/') != ['Work']:
-				Paste = gtk.MenuItem(_('Pegar'))
+				Paste = Gtk.MenuItem(_('Pegar'))
 				Paste.connect('activate',self.paste)
 				Menu.append(Paste)
-			Menu.append(gtk.SeparatorMenuItem())
+			Menu.append(Gtk.SeparatorMenuItem())
 			Menu.append(Delete)
 			Menu.append(Back)
 			Menu.show_all()
-			Menu.popup(None, None, None, Boton, Tiempo)
+			Menu.popup(None, None, None, None,Boton, Tiempo)
 	def atras_button(self,widget,event):
 		Boton = event.keyval
 		if Boton == 65288:
@@ -399,19 +402,19 @@ class Canvas(gtk.TreeView):
 		except:
 			self.errores('Copiar')
 	def sure(self,widget=None):
-		info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_YES_NO,
+		info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.YES_NO,
 			message_format=_("Seguro que desea borrar el archivo: %s" %utils.Archivos))
 		respuesta = info.run()
-		if respuesta == gtk.RESPONSE_YES:
+		if respuesta == Gtk.ResponseType.YES:
 			self.delete()
 			info.destroy()
 		else:
 			info.destroy()
 	def ops(self,donde):
-		info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,
+		info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,
 			message_format=_("Error al acceder al "+donde+" razón:\n%s" %self.razon(str(Uri.get_text()),donde)))
 		respuesta = info.run()
-		if respuesta == gtk.RESPONSE_OK:
+		if respuesta == Gtk.ResponseType.OK:
 			Ant = os.getcwd()
 			os.chdir(Ant)
 			Uri.set_text(os.getcwd())
@@ -446,68 +449,68 @@ class Canvas(gtk.TreeView):
 			acopiar.destroy()
 	def errores(self,Evento=None):
 		if Evento == "Copiar":
-			info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=_("Error al intentar copiar: %s "%utils.Archivos))
+			info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=_("Error al intentar copiar: %s "%utils.Archivos))
 			a = info.run()
-			if a == gtk.RESPONSE_OK:
+			if a == Gtk.ResponseType.OK:
 				info.destroy()
 		if Evento == "Cortar":
-			info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=_("Error al intentar cortar: %s "%utils.Archivos))
+			info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=_("Error al intentar cortar: %s "%utils.Archivos))
 			a = info.run()
-			if a == gtk.RESPONSE_OK:
+			if a == Gtk.ResponseType.OK:
 				info.destroy()		
 		if Evento == "Pegar_None":
-			info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=_("Error: No hay nada en el portapapeles" ))
+			info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=_("Error: No hay nada en el portapapeles" ))
 			a = info.run()
-			if a == gtk.RESPONSE_OK:
+			if a == Gtk.ResponseType.OK:
 				info.destroy()	
 		if Evento == "Pegar":
-			info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=_("Error al intentar pegar un archivo" ))
+			info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=_("Error al intentar pegar un archivo" ))
 			a = info.run()
-			if a == gtk.RESPONSE_OK:
+			if a == Gtk.ResponseType.OK:
 				info.destroy()	
 		if Evento == 'Copiar_a_nada':
-			info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=_("¡Ups! Parece que aún no abrio ningun archivo"))
+			info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=_("¡Ups! Parece que aún no abrio ningun archivo"))
 			a = info.run()
-			if a == gtk.RESPONSE_OK:
+			if a == Gtk.ResponseType.OK:
 				info.destroy()			
 		if Evento == 'Desconocido':
-			info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=_("Error desconocido"))
+			info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=_("Error desconocido"))
 			a = info.run()
-			if a == gtk.RESPONSE_OK:
+			if a == Gtk.ResponseType.OK:
 				info.destroy()			
-class Canvas_box(gtk.EventBox):
+class Canvas_box(Gtk.EventBox):
     def __init__(self):
-		gtk.EventBox.__init__(self)
+		GObject.GObject.__init__(self)
 
-		vbox = gtk.VBox(False, 8)
-		xhbox = gtk.HBox()
-		sw = gtk.ScrolledWindow()
-		sw.set_shadow_type(gtk.SHADOW_ETCHED_IN)
-		sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+		vbox = Gtk.VBox(False, 8)
+		xhbox = Gtk.HBox()
+		sw = Gtk.ScrolledWindow()
+		sw.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
+		sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+
 		xhbox.pack_start(Uri,True,True,0)
-		hbox = gtk.HBox()
-		vbox.pack_start(xhbox,False,False)
-		vbox.pack_start(hbox)
-		Logo = gtk.Image()
+		hbox = Gtk.HBox()
+		vbox.pack_start(xhbox,False,False,0)
+		vbox.pack_start(hbox,True,True,0)
+		Logo = Gtk.Image()
 		Logo.set_from_file('icons/ceibaljam.svg')
 		hbox.pack_start(sw, True, True, 0)
 		sw.add(Canvas())
-		hx = gtk.HBox()
-		Logo2 = gtk.Image()
+		hx = Gtk.HBox()
+		Logo2 = Gtk.Image()
 		Logo.set_tooltip_text('http://www.ceibaljam.org')
 		Logo2.set_from_file('icons/sugarlabs.svg')
 		Logo2.set_tooltip_text('http://www.wiki.sugarlabs.org')
-
 		self.add(vbox)
 		vbox.pack_start(Hboxx,False,False,0)
-		if gtk.gdk.screen_width() >= 1200:
+		if Gdk.Screen.width() >= 1200:
 			vbox.pack_start(hx,False,False,0)
 			hx.pack_start(Logo2,True,True,0)		
 			hx.pack_start(Logo,True,True,100)
 		else:
-			Uri.set_size_request(int(gtk.gdk.screen_width()-157.797),int(45.466))
+			Uri.set_size_request(int(Gdk.Screen.width()-157.797),int(45.466))
 			Uri.show()
-			LogoChico = gtk.Image()
+			LogoChico = Gtk.Image()
 			LogoChico.set_from_file('icons/ceibaljam_chico.svg')
 			
 			LogoChico.show()
@@ -515,10 +518,11 @@ class Canvas_box(gtk.EventBox):
 		self.show_all()
 		
 if __name__ == "__main__":
-	a = gtk.Window()
+	a = Gtk.Window()
 	a.add(Canvas_box())
-	a.set_title('COMPRESS CANVAS GTK2')
 	a.show_all()
-	a.connect('destroy',lambda x: gtk.main_quit())
+	a.set_title('COMPRESS CANVAS GTK3')
+
+	a.connect('destroy',lambda x: Gtk.main_quit())
 	a.set_size_request(500,500)
-	gtk.main()
+	Gtk.main()

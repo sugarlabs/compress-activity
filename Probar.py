@@ -1,6 +1,6 @@
 import CompressCanvas as C
-import gtk
-a = gtk.Window()
+from gi.repository import Gtk
+a = Gtk.Window()
 a.add(C.Canvas_box())
 a.show_all()
-gtk.main()
+Gtk.main()

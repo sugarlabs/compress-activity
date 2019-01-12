@@ -22,9 +22,11 @@
 #  MA 02110-1301, USA.
 #  
 #  
-import zipfile,gtk
-import utils,commands
-from sugar.graphics.toolbutton import ToolButton
+from gi.repository import Gtk
+import zipfile
+import utils3 as utils
+import commands
+from sugar3.graphics.toolbutton import ToolButton
 import os, shutil
 from gettext import gettext as _
 try:
@@ -41,21 +43,21 @@ def Descomprimir(Archivo):
 	
 class Abrir():
 	def __init__(self,box,texto):
-		Ventana = gtk.FileChooserDialog("Abrir..",
+		Ventana = Gtk.FileChooserDialog("Abrir..",
      			None,
-			gtk.FILE_CHOOSER_ACTION_OPEN,
-			(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-			gtk.STOCK_OK, gtk.RESPONSE_OK))
+			Gtk.FileChooserAction.OPEN,
+			(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+			Gtk.STOCK_OK, Gtk.ResponseType.OK))
 
-		Ventana.set_default_response(gtk.RESPONSE_OK)
+		Ventana.set_default_response(Gtk.ResponseType.OK)
 
-		Filtro = gtk.FileFilter()
+		Filtro = Gtk.FileFilter()
 		Filtro.set_name("Archivos ZIP")
 		Filtro.add_pattern("*.zip")
 		Ventana.add_filter(Filtro)
 
 		Echo = Ventana.run()
-		if Echo == gtk.RESPONSE_OK:
+		if Echo == Gtk.ResponseType.OK:
 			File = Ventana.get_filename()
 			utils.Archivo_d = File
 			try:
@@ -65,25 +67,25 @@ class Abrir():
 			except:
 				Ventana.destroy()
 			
-		elif Echo == gtk.RESPONSE_CANCEL:
+		elif Echo == Gtk.ResponseType.CANCEL:
 	    		Ventana.destroy()
 
 
 class Abrir_Directorio():
 	def __init__(self,widget,texto,files,estado,box):
-		Ventana = gtk.FileSelection("Abrir..")
+		Ventana = Gtk.FileSelection("Abrir..")
 
-		Ventana.set_default_response(gtk.RESPONSE_OK)
+		Ventana.set_default_response(Gtk.ResponseType.OK)
 
 		Estado = estado
 		Echo = Ventana.run()
-		if Echo == gtk.RESPONSE_OK:
+		if Echo == Gtk.ResponseType.OK:
 			File = Ventana.get_filename()
 			Ventana.destroy()
 			texto.set_text(File)
 			texto.show()
 			estado = False
-		elif Echo == gtk.RESPONSE_CANCEL:
+		elif Echo == Gtk.ResponseType.CANCEL:
 			box.hide()
 			Ventana.destroy()
 #COPIADO DE JAMEDIA - FLAVIO DANESSE #
@@ -128,9 +130,9 @@ def decompress(archivo,box, destino='/tmp/Compress/Work',estado='Abrir',diario=F
 	try:
 		zipped = zipfile.ZipFile(archivo)
 	except zipfile.BadZipfile:		
-		info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=Mensaje)
+		info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=Mensaje)
 		a = info.run()
-		if a == gtk.RESPONSE_OK:
+		if a == Gtk.ResponseType.OK:
 			info.destroy()
 			box.hide()
 	try:
@@ -138,9 +140,9 @@ def decompress(archivo,box, destino='/tmp/Compress/Work',estado='Abrir',diario=F
 			os.chdir(destino)
 	
 	except RuntimeError:
-		info = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_OK,message_format=_("Archivos con contraseña aún no han sido implementados"))
+		info = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,message_format=_("Archivos con contraseña aún no han sido implementados"))
 		a = info.run()
-		if a == gtk.RESPONSE_OK:
+		if a == Gtk.ResponseType.OK:
 			info.destroy()
 	
 def compress(archivos_a_meter, archivo):

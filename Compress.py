@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 try: # gtk3
-	from sugar30.activity import activity
+	from sugar3.activity import activity
 	from sugar3.activity.widgets import StopButton
 	from sugar3.activity.widgets import ActivityToolbarButton
 	from sugar3.graphics.toolbutton import ToolButton
@@ -65,12 +65,12 @@ try: # gtk3
 				self.show_all()
 				save.hide()
 except ImportError:
-	import gtk
-	from sugar.activity import activity
-	from sugar.activity.widgets import StopButton
-	from sugar.activity.widgets import ActivityToolbarButton
-	from sugar.graphics.toolbutton import ToolButton
-	from sugar.graphics.toolbarbox import ToolbarBox
+	from gi.repository import Gtk
+	from sugar3.activity import activity
+	from sugar3.activity.widgets import StopButton
+	from sugar3.activity.widgets import ActivityToolbarButton
+	from sugar3.graphics.toolbutton import ToolButton
+	from sugar3.graphics.toolbarbox import ToolbarBox
 	from gettext import gettext as _    # Traduccion
 	import utils
 	from utils import Boton
@@ -91,9 +91,9 @@ except ImportError:
 				Parar = StopButton(self)
 				Parar.set_tooltip(_('Parar - Gtk2'))
 				#<-------------Separadores------------->#
-				Separador = gtk.SeparatorToolItem()
-				Separador2  = gtk.SeparatorToolItem()
-				Separador3 = gtk.SeparatorToolItem()
+				Separador = Gtk.SeparatorToolItem()
+				Separador2  = Gtk.SeparatorToolItem()
+				Separador3 = Gtk.SeparatorToolItem()
 				Separador3.set_expand(True)
 				Separador3.props.draw = False
 				Barra.toolbar.insert(Actividad, 0)      
