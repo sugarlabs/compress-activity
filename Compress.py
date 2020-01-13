@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 try: # gtk3
-	from sugar30.activity import activity
+	from sugar3.activity import activity
 	from sugar3.activity.widgets import StopButton
 	from sugar3.activity.widgets import ActivityToolbarButton
 	from sugar3.graphics.toolbutton import ToolButton
